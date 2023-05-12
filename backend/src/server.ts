@@ -1,5 +1,4 @@
 import Fastify from 'fastify'
-
 import { AppRoutes } from './routes'
 
 const app = Fastify()
