@@ -1,10 +1,10 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "./lib/prisma";
-import cors from "@fastify/cors";
+
 
 export async function AppRoutes(app: FastifyInstance) {
-  app.register(cors);
+  
   // Cria rota com o verbo get
   app.get("/hello", () => {
     return "Hello World";
@@ -62,10 +62,21 @@ export async function AppRoutes(app: FastifyInstance) {
       id: z.number(),
       content: z.string(),
     });
-
+  
     // Recupera os dados do frontend
     const { id, content } = contentBody.parse(request.body);
-
+  
+    // Verifica se o post existe no banco de dados
+    const post = await prisma.post.findUnique({
+      where: {
+        id: id,
+      },
+    });
+  
+    if (!post) {
+      throw new Error("Post não encontrado");
+    }
+  
     // Atualiza no banco de dados
     const postUpdated = await prisma.post.update({
       where: {
@@ -112,11 +123,22 @@ export async function AppRoutes(app: FastifyInstance) {
     const IdParam = z.object({
       id: z.string(),
     });
-
+  
     const { id } = IdParam.parse(request.params);
-
+  
     const idNumber = Number(id);
-
+  
+    // Verifica se o post existe no banco de dados
+    const post = await prisma.post.findUnique({
+      where: {
+        id: idNumber,
+      },
+    });
+  
+    if (!post) {
+      throw new Error("Post não encontrado");
+    }
+  
     const postDeleted = await prisma.post.delete({
       where: {
         id: idNumber,
